@@ -5,7 +5,8 @@ export type TBooking = {
   slots: Types.ObjectId[];
   user: Types.ObjectId;
   date: string;
-  totalAmount: number;
-  isConfirmed: boolean;
-  isDeleted: boolean;
+  totalAmount?: number;
+  isConfirmed?: boolean | string;
+  isDeleted?: boolean;
 };
+

@@ -1,59 +1,55 @@
-import { Request, Response } from "express";
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { SlotServices } from "./slot-service";
+import catchAsync from "../../utils/catchAsync";
+import sendResponse from "../../utils/sendResponse";
+import httpStatus from "http-status";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-const createSlots = async (req: Request, res: Response) => {
-  try {
-    const { room, date, startTime, endTime } = req.body;
+const createSlots = catchAsync(async (req, res, next) => {
+  const body = req.body;
 
-    // const slotValidationWithZod = slotValidaitons.createSlotSchema.parse(
-    //   room,
-    //   date,
-    //   startTime,
-    //   endTime
-    // );
+  const result = await SlotServices.createSlotsIntoDB(body);
 
-    const slots = await SlotServices.createSlotsIntoDB(
-      room,
-      date,
-      startTime,
-      endTime
-    );
-    res.status(200).json({
-      success: true,
-      statusCode: 200,
-      message: "Slots created successfully",
-      data: slots,
-    });
-  } catch (error: any) {
-    res.status(500).json({
+  if (!result) {
+    sendResponse(res, {
+      statusCode: httpStatus.NOT_FOUND,
       success: false,
-      statusCode: 500,
-      message: "An error occurred",
-      error: error.message,
+      message: "No Data Found",
+      data: [],
     });
   }
-};
 
-const getAvailableSlots = async (req: Request, res: Response) => {
-  try {
-    const { date, roomId } = req.query;
-    const slots = await  SlotServices.getAvailableSlotsIntoDB(date, roomId);
-    res.status(200).json({
-      success: true,
-      statusCode: 200,
-      message: "Available slots retrieved successfully",
-      data: slots,
-    });
-  } catch (error: any) {
-    res.status(500).json({
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Slots created successfully',
+    data: result,
+  });
+})
+
+const getAvailableSlots = catchAsync(async (req, res, next) => {
+  const { date, roomId } = req.query;
+  const result = await SlotServices.getAvailableSlotsIntoDB(
+    date as string,
+    roomId as string
+  );
+
+  if (!result) {
+    sendResponse(res, {
+      statusCode: httpStatus.NOT_FOUND,
       success: false,
-      statusCode: 500,
-      message: "An error occurred",
-      error: error.message,
+      message: "No Data Found",
+      data: [],
     });
   }
-};
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Available slots retrieved successfully',
+    data: result,
+  });
+})
 
 export const SlotControllers = {
   createSlots,

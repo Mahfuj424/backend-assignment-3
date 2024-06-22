@@ -1,72 +1,48 @@
-// /* eslint-disable @typescript-eslint/no-explicit-any */
-// /* eslint-disable @typescript-eslint/no-unused-vars */
-// import { ErrorRequestHandler } from 'express';
-// import { ZodError } from 'zod';
-// import { TErrorSourse } from '../interface/error';
-// import config from '../config';
-// import { handleZodError } from '../errors/zodErrorValidator';
-// import { handleMongooseError } from '../errors/mongooseErrorValidator';
-// import { handleCastError } from '../errors/handleCastError';
-// import { handleDuplicateError } from '../errors/handleDuplicateError';
-// import AppError from '../errors/AppError';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Request, Response, NextFunction } from "express";
+import { ZodError } from "zod";
 
-// const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
-//   let statusCode = err.statusCode || 500;
-//   let message = err.message || 'something went wrong';
+const errorMiddleware = (
+  err: any,
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  let statusCode = 500;
+  let message = err.message || "Internal Server Error";
+  let errorMessages = [{ path: "", message }];
 
-//   let errorSourses: TErrorSourse = [
-//     {
-//       path: '',
-//       message: 'something went wrong',
-//     },
-//   ];
+  if (err.name === "ValidationError") {
+    statusCode = 400;
+    message = "Validation Error";
+    errorMessages = Object.values(err.errors).map((el: any) => ({
+      path: el.path,
+      message: el.message,
+    }));
+  } else if (err.name === "CastError") {
+    statusCode = 400;
+    message = "Cast Error";
+    errorMessages = [{ path: err.path, message: "Invalid ID format" }];
+  } else if (err.code === 11000) {
+    statusCode = 400;
+    message = "Duplicate Entry";
+    errorMessages = [{ path: "", message: err.message }];
+  } else if (err instanceof ZodError) {
+    statusCode = 400;
+    message = "Validation Error";
+    errorMessages = err.errors.map((error: any) => ({
+      path: error.path.join("."),
+      message: error.message,
+    }));
+  }
 
-//   if (err instanceof ZodError) {
-//     const simplyfiedError = handleZodError(err);
-//     statusCode = simplyfiedError?.statusCode;
-//     message = simplyfiedError?.message;
-//     errorSourses = simplyfiedError?.errorSourse;
-//   } else if (err?.name === 'ValidationError') {
-//     const simplyfiedError = handleMongooseError(err);
-//     statusCode = simplyfiedError?.statusCode;
-//     message = simplyfiedError?.message;
-//     errorSourses = simplyfiedError?.errorSourse;
-//   } else if (err?.name === 'CastError') {
-//     const simplyfiedError = handleCastError(err);
-//     statusCode = simplyfiedError?.statusCode;
-//     message = simplyfiedError?.message;
-//     errorSourses = simplyfiedError?.errorSourse;
-//   } else if (err?.code === 11000) {
-//     const simplyfiedError = handleDuplicateError(err);
-//     statusCode = simplyfiedError?.statusCode;
-//     message = simplyfiedError?.message;
-//     errorSourses = simplyfiedError?.errorSourse;
-//   } else if (err instanceof AppError) {
-//     statusCode = err?.statusCode;
-//     message = err?.message;
-//     errorSourses = [
-//       {
-//         path: '',
-//         message: err.message,
-//       },
-//     ];
-//   } else if (err instanceof Error) {
-//     message = err?.message;
-//     errorSourses = [
-//       {
-//         path: '',
-//         message: err.message,
-//       },
-//     ];
-//   }
+  res.status(statusCode).json({
+    success: false,
+    message,
+    errorMessages,
+    stack: err.stack,
+  });
+};
 
-//   res.status(statusCode).json({
-//     success: false,
-//     message,
-//     errorSourses,
-//     err,
-//     stack: config.NODE_ENV === 'development' ? err.stack : null,
-//   });
-// };
-
-// export default globalErrorHandler;
+export default errorMiddleware;

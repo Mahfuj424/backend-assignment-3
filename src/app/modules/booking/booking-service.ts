@@ -3,31 +3,32 @@ import { Slot } from "../slots/slot-model";
 import { TBooking } from "./booking-interface";
 import { Booking } from "./booking-model";
 
+// create a room booking
 export const bookingRoomFromDB = async (payload: TBooking) => {
   const { room, slots, user, date } = payload;
 
-  // Fetch room details to calculate the price
+  
   const roomDetails = await Room.findById(room);
   if (!roomDetails) {
     throw new Error("Room not found");
   }
 
-  // Fetch the selected slots to mark them as booked
+  
   const slotDetails = await Slot.find({ _id: { $in: slots } });
   if (slotDetails.length !== slots.length) {
     throw new Error("Some slots not found");
   }
 
-  // Calculate the total amount
+  
   const totalAmount = slotDetails.length * roomDetails.pricePerSlot;
 
-  // Mark slots as booked
+  
   for (const slot of slotDetails) {
     slot.isBooked = true;
     await slot.save();
   }
 
-  // Create the booking
+  
   const booking = new Booking({
     room,
     slots,
@@ -49,6 +50,8 @@ export const bookingRoomFromDB = async (payload: TBooking) => {
   return populatedBooking;
 };
 
+
+// get all booking
 const getAllBookingFromDB = async () => {
   const result = await Booking.find()
     .populate("room")
@@ -57,11 +60,37 @@ const getAllBookingFromDB = async () => {
   return result;
 };
 
-const getMyBookingFromDB = async () => {
-  const result = await Booking.find()
+
+// get booking for user
+const getMyBookingFromDB = async (userId:string) => {
+  const result = await Booking.find({user:userId, isDeleted:false})
     .populate("room")
     .populate("slots")
     .populate("user");
+  return result;
+};
+
+
+// update a booking 
+const updateBookingRoomFromDB = async (
+  id: string,
+  payload: Partial<TBooking>
+) => {
+  const result = await Booking.findByIdAndUpdate(id, payload, {
+    new: true,
+    runValidators: true,
+  });
+  return result;
+};
+
+
+// soft delete Booking
+const deleteRoomFromDB = async (id: string) => {
+  const result = await Booking.findByIdAndUpdate(
+    id,
+    { isDeleted: true },
+    { new: true, runValidators: true }
+  );
   return result;
 };
 
@@ -69,4 +98,6 @@ export const BookingServices = {
   bookingRoomFromDB,
   getAllBookingFromDB,
   getMyBookingFromDB,
+  updateBookingRoomFromDB,
+  deleteRoomFromDB,
 };

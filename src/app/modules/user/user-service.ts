@@ -6,16 +6,8 @@ const createUserIntoDB = async (payload: TUser) => {
   return result;
 };
 
-const logInUserIntoDB = async (email: string, password: string) => {
-  const user = await User.findOne({ email, password });
-  if (!user) {
-    throw new Error("invalid email and password");
-  } else {
-    return user;
-  }
-};
+
 
 export const UserServices = {
   createUserIntoDB,
-  logInUserIntoDB
 };

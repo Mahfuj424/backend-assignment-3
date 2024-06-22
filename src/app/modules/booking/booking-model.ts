@@ -25,15 +25,17 @@ const bookingSchema = new Schema<TBooking>({
   },
   totalAmount: {
     type: Number,
-    required: true,
+    required: false,
   },
   isConfirmed: {
-    type: Boolean,
+    type: Schema.Types.Mixed,
     default: false,
+    required: false,
   },
   isDeleted: {
     type: Boolean,
     default: false,
+    required: false,
   },
 });
 

@@ -1,7 +1,8 @@
 import mongoose from "mongoose";
+import { Server } from 'http';
 import config from "./app/config";
 import app from "./app";
-
+let server: Server;
 
 async function main() {
   try {
@@ -15,3 +16,19 @@ async function main() {
 }
 
 main();
+
+
+process.on('unhandledRejection', () => {
+  console.log(`unhandleRejection on is detected, sutting down server`);
+  if (server) {
+    server.close(() => {
+      process.exit(1);
+    });
+  }
+  process.exit(1);
+});
+
+process.on('uncaughtException', () => {
+  console.log(`uncaughtException on is detected, sutting down server`);
+  process.exit(1);
+});

@@ -1,58 +1,31 @@
-import { Request, Response } from "express";
-import { z } from "zod";
-import userValidationSchema from "./user-validation";
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { UserServices } from "./user-service";
+import catchAsync from "../../utils/catchAsync";
+import sendResponse from "../../utils/sendResponse";
+import httpStatus from "http-status";
 
-export const createUser = async (req: Request, res: Response) => {
-  try {
-    const userData = req.body;
+export const createUser = catchAsync(async (req, res, next) => {
+  const userData = req.body;
 
-    const zodValidateUser = userValidationSchema.parse(userData);
+  const result = await UserServices.createUserIntoDB(userData);
 
-    const result = await UserServices.createUserIntoDB(zodValidateUser);
-    res.status(201).json({
-      success: true,
-      statusCode: 201,
-      message: "User created successfully",
-      data: result,
-    });
-  } catch (err) {
-    if (err instanceof z.ZodError) {
-      res.status(400).json({
-        success: false,
-        message: "Validation failed",
-        errors: err.errors,
-      });
-    } else {
-      res.status(500).json({
-        success: false,
-        message: "Failed to create user",
-      });
-    }
-  }
-};
-
-const loginUser = async (req: Request, res: Response) => {
-  try {
-    const email = req.body.email;
-    const password = req.body.password;
-
-    const result = await UserServices.logInUserIntoDB(email, password);
-    res.status(201).json({
-      success: true,
-      statusCode: 201,
-      message: "User logedIn successfully",
-      data: result,
-    });
-  } catch (err) {
-    res.status(500).json({
+  if (!result) {
+    sendResponse(res, {
+      statusCode: httpStatus.NOT_FOUND,
       success: false,
-      message: "Failed to logedIn user",
+      message: "No Data Found",
+      data: [],
     });
   }
-};
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "User registered successfully",
+    data: result,
+  });
+});
 
 export const UserControllers = {
   createUser,
-  loginUser
 };

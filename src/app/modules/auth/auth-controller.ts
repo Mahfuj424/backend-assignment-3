@@ -1,24 +1,32 @@
-import { Request, Response } from "express";
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { AuthServices } from "./auth-service";
+import catchAsync from "../../utils/catchAsync";
+import sendResponse from "../../utils/sendResponse";
+import httpStatus from "http-status";
 
-const logInUser = async (req: Request, res: Response) => {
-  try {
-    const { email, password } = req.body;
-    const result = await AuthServices.logInUserIntoDB(email, password);
+const logInUser = catchAsync(async (req, res, next) => {
+  const body = req.body;
 
-    res.status(201).json({
-      success: true,
-      statusCode: 201,
-      message: "User logedIn successfully",
-      data: result,
-    });
-  } catch (err) {
-    res.status(500).json({
+  const { email, password } = body;
+
+  const result = await AuthServices.logInUserIntoDB(email, password);
+
+  if (!result) {
+    sendResponse(res, {
+      statusCode: httpStatus.NOT_FOUND,
       success: false,
-      message: "Failed to logedIn user",
+      message: "No Data Found",
+      data: [],
     });
   }
-};
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "User logged in successfully",
+    data: result,
+  });
+});
 
 export const AuthControllers = {
   logInUser,

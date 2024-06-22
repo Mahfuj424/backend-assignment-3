@@ -1,23 +1,25 @@
 import { z } from "zod";
 
 export const createRoomValidationSchema = z.object({
-  name: z.string().nonempty({ message: "Name is required" }),
-  roomNo: z
-    .number()
-    .nonnegative({ message: "Room number must be a non-negative integer" }),
-  floorNo: z
-    .number()
-    .nonnegative({ message: "Floor number must be a non-negative integer" }),
-  capacity: z
-    .number()
-    .positive({ message: "Capacity must be a positive integer" }),
-  pricePerSlot: z
-    .number()
-    .positive({ message: "Price per slot must be a positive number" }),
-  amenities: z
-    .array(z.string().nonempty({ message: "Amenity cannot be empty" }))
-    .nonempty({ message: "Amenities are required" }),
-  isDeleted: z.boolean().default(false),
+  body: z.object({
+    name: z.string().nonempty({ message: "Name is required" }),
+    roomNo: z
+      .number()
+      .nonnegative({ message: "Room number must be a non-negative integer" }),
+    floorNo: z
+      .number()
+      .nonnegative({ message: "Floor number must be a non-negative integer" }),
+    capacity: z
+      .number()
+      .positive({ message: "Capacity must be a positive integer" }),
+    pricePerSlot: z
+      .number()
+      .positive({ message: "Price per slot must be a positive number" }),
+    amenities: z
+      .array(z.string().nonempty({ message: "Amenity cannot be empty" }))
+      .nonempty({ message: "Amenities are required" }),
+    isDeleted: z.boolean().default(false),
+  }),
 });
 
 const updateRoomValidationSchema = z.object({

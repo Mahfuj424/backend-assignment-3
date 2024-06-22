@@ -1,70 +1,123 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Request, Response } from "express";
 import { BookingServices } from "./booking-service";
+import catchAsync from "../../utils/catchAsync";
+import sendResponse from "../../utils/sendResponse";
+import httpStatus from "http-status";
 
-const bookingRoom = async (req: Request, res: Response) => {
-  try {
-    const body = req.body;
+const bookingRoom = catchAsync(async (req, res, next) => {
+  const body = req.body;
 
-    const result = await BookingServices.bookingRoomFromDB(body);
-    res.status(200).json({
-      success: true,
-      statusCode: 200,
-      message: "room booked successfully",
-      data: result,
-    });
-  } catch (error: any) {
-    res.status(500).json({
+  const result = await BookingServices.bookingRoomFromDB(body);
+
+  if (!result) {
+    sendResponse(res, {
+      statusCode: httpStatus.NOT_FOUND,
       success: false,
-      statusCode: 500,
-      message: "An error occurred",
-      error: error.message,
+      message: "No Data Found",
+      data: [],
     });
   }
-};
 
-const getAllBooking = async (req: Request, res: Response) => {
-  try {
-    const result = await BookingServices.getAllBookingFromDB();
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Booking created successfully",
+    data: result,
+  });
+});
 
-    res.status(200).json({
-      success: true,
-      statusCode: 200,
-      message: "room booked successfully",
-      data: result,
-    });
-  } catch (error: any) {
-    res.status(500).json({
+const getAllBooking = catchAsync(async (req, res, next) => {
+  
+  const result = await BookingServices.getAllBookingFromDB();
+
+  if (!result) {
+    sendResponse(res, {
+      statusCode: httpStatus.NOT_FOUND,
       success: false,
-      statusCode: 500,
-      message: "An error occurred",
-      error: error.message,
+      message: "No Data Found",
+      data: [],
     });
   }
-};
 
-const getMyBooking = async (req: Request, res: Response) => {
-  try {
-    const result = await BookingServices.getMyBookingFromDB();
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "All bookings retrieved successfully",
+    data: result,
+  });
+});
 
-    res.status(200).json({
-      success: true,
-      statusCode: 200,
-      message: "room booked successfully",
-      data: result,
-    });
-  } catch (error: any) {
-    res.status(500).json({
+const getMyBooking = catchAsync(async (req, res, next) => {
+  const userId = req.user._id
+  const result = await BookingServices.getMyBookingFromDB(userId);
+
+  if (!result) {
+    sendResponse(res, {
+      statusCode: httpStatus.NOT_FOUND,
       success: false,
-      statusCode: 500,
-      message: "An error occurred",
-      error: error.message,
+      message: "No Data Found",
+      data: [],
     });
   }
-};
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "User bookings retrieved successfully",
+    data: result,
+  });
+});
+
+const updateBookingRoom = catchAsync(async (req, res, next) => {
+  const { id } = req.params;
+  const body = req.body;
+
+  const result = await BookingServices.updateBookingRoomFromDB(id, body);
+
+  if (!result) {
+    sendResponse(res, {
+      statusCode: httpStatus.NOT_FOUND,
+      success: false,
+      message: "No Data Found",
+      data: [],
+    });
+  }
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Booking updated successfully",
+    data: result,
+  });
+});
+
+const deleteRoom = catchAsync(async (req, res, next) => {
+  const { id } = req.params;
+
+  const result = await BookingServices.deleteRoomFromDB(id);
+
+  if (!result) {
+    sendResponse(res, {
+      statusCode: httpStatus.NOT_FOUND,
+      success: false,
+      message: "No Data Found",
+      data: [],
+    });
+  }
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Booking deleted successfully",
+    data: result,
+  });
+});
 
 export const BookingControllers = {
   bookingRoom,
   getAllBooking,
   getMyBooking,
+  updateBookingRoom,
+  deleteRoom,
 };

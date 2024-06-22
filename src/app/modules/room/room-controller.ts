@@ -1,107 +1,121 @@
-import { Request, Response } from "express";
-import { createRoomValidationSchema } from "./room-validation";
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { RoomServices } from "./room-service";
 import httpStatus from "http-status";
+import sendResponse from "../../utils/sendResponse";
+import catchAsync from "../../utils/catchAsync";
 
-const createRoom = async (req: Request, res: Response) => {
-  try {
-    const roomData = req.body;
-    const zodParseData = createRoomValidationSchema.parse(roomData);
+const createRoom = catchAsync(async (req, res, next) => {
+  const roomData = req.body;
 
-    const result = await RoomServices.createRoomIntoDB(zodParseData);
-    res.status(201).json({
-      success: true,
-      statusCode: httpStatus.OK,
-      message: "Room created successfully",
-      data: result,
-    });
-  } catch (err) {
-    res.status(500).json({
+  const result = await RoomServices.createRoomIntoDB(roomData);
+
+  if (!result) {
+    sendResponse(res, {
+      statusCode: httpStatus.NOT_FOUND,
       success: false,
-      message: "Failed to create product",
+      message: "No Data Found",
+      data: [],
     });
   }
-};
 
-const getSingleRoom = async (req: Request, res: Response) => {
-  try {
-    const id = req.params.id;
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Room added successfully",
+    data: result,
+  });
+});
 
-    const result = await RoomServices.getSingleRoomFromDB(id);
-    res.status(201).json({
-      success: true,
-      statusCode: httpStatus.OK,
-      message: "Room retrieved successfully",
-      data: result,
-    });
-  } catch (err) {
-    res.status(500).json({
+const getSingleRoom = catchAsync(async (req, res, next) => {
+  const id = req.params.id;
+
+  const result = await RoomServices.getSingleRoomFromDB(id);
+
+  if (!result) {
+    sendResponse(res, {
+      statusCode: httpStatus.NOT_FOUND,
       success: false,
-      message: "Failed to retrieved Room",
+      message: "No Data Found",
+      data: [],
     });
   }
-};
 
-const getAllRoom = async (req: Request, res: Response) => {
-  try {
-    const result = await RoomServices.getAllRoomFromDB();
-    res.status(201).json({
-      success: true,
-      statusCode: httpStatus.OK,
-      message: "Room retrieved successfully",
-      data: result,
-    });
-  } catch (err) {
-    res.status(500).json({
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Room retrieved successfully",
+    data: result,
+  });
+});
+
+const getAllRoom = catchAsync(async (req, res, next) => {
+  const result = await RoomServices.getAllRoomFromDB();
+
+  if (!result) {
+    sendResponse(res, {
+      statusCode: httpStatus.NOT_FOUND,
       success: false,
-      message: "Failed to retrieved Room",
+      message: "No Data Found",
+      data: [],
     });
   }
-};
 
-const updateRoom = async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-    const updatedData = req.body;
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Rooms retrieved successfully",
+    data: result,
+  });
+});
 
-    const result = await RoomServices.updateRoomFromDB(id, updatedData);
+const updateRoom = catchAsync(async (req, res, next) => {
+  const { id } = req.params;
+  const updatedData = req.body;
 
-    res.status(201).json({
-      success: true,
-      statusCode: httpStatus.OK,
-      message: "Room updated successfully",
-      data: result,
-    });
-  } catch (err) {
-    res.status(500).json({
+  const result = await RoomServices.updateRoomFromDB(id, updatedData);
+
+  if (!result) {
+    sendResponse(res, {
+      statusCode: httpStatus.NOT_FOUND,
       success: false,
-      message: "Failed to update Room",
+      message: "No Data Found",
+      data: [],
     });
   }
-};
 
-const deleteRoom = async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-    const result = await RoomServices.deleteRoomFromDB(id);
-    res.status(201).json({
-      success: true,
-      statusCode: httpStatus.OK,
-      message: "Room deleted successfully",
-      data: result,
-    });
-  } catch (err) {
-    res.status(500).json({
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Room updated successfully",
+    data: result,
+  });
+});
+
+const deleteRoom = catchAsync(async (req, res, next) => {
+  const { id } = req.params;
+  const result = await RoomServices.deleteRoomFromDB(id);
+
+  if (!result) {
+    sendResponse(res, {
+      statusCode: httpStatus.NOT_FOUND,
       success: false,
-      message: "Failed to delete Room",
+      message: "No Data Found",
+      data: [],
     });
   }
-};
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Room deleted successfully",
+    data: result,
+  });
+});
 
 export const RoomControllers = {
   createRoom,
   getSingleRoom,
   getAllRoom,
   updateRoom,
-  deleteRoom
+  deleteRoom,
 };

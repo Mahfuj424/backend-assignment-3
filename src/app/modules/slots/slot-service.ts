@@ -1,12 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { TSlot } from "./slot-interface";
 import { Slot } from "./slot-model";
 
-const createSlotsIntoDB = async (
-  room: string,
-  date: string,
-  startTime: string,
-  endTime: string
-) => {
+const createSlotsIntoDB = async (payload: TSlot) => {
+  const { room, date, startTime, endTime } = payload
+
   const existingSlots = await Slot.find({ room, date });
 
   if (existingSlots.length > 0) {
