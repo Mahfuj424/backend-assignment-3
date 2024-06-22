@@ -31,7 +31,7 @@ const getAllBooking = catchAsync(async (req, res, next) => {
   
   const result = await BookingServices.getAllBookingFromDB();
 
-  if (!result) {
+  if (!result || result.length < 0) {
     sendResponse(res, {
       statusCode: httpStatus.NOT_FOUND,
       success: false,
@@ -52,7 +52,7 @@ const getMyBooking = catchAsync(async (req, res, next) => {
   const userId = req.user._id
   const result = await BookingServices.getMyBookingFromDB(userId);
 
-  if (!result) {
+  if (!result || result.length < 0) {
     sendResponse(res, {
       statusCode: httpStatus.NOT_FOUND,
       success: false,

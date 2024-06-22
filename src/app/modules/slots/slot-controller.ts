@@ -10,7 +10,7 @@ const createSlots = catchAsync(async (req, res, next) => {
 
   const result = await SlotServices.createSlotsIntoDB(body);
 
-  if (!result) {
+  if (!result || result.length < 0) {
     sendResponse(res, {
       statusCode: httpStatus.NOT_FOUND,
       success: false,
@@ -34,7 +34,7 @@ const getAvailableSlots = catchAsync(async (req, res, next) => {
     roomId as string
   );
 
-  if (!result) {
+  if (!result || result.length < 0) {
     sendResponse(res, {
       statusCode: httpStatus.NOT_FOUND,
       success: false,

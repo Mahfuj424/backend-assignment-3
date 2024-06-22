@@ -51,7 +51,7 @@ const getSingleRoom = catchAsync(async (req, res, next) => {
 const getAllRoom = catchAsync(async (req, res, next) => {
   const result = await RoomServices.getAllRoomFromDB();
 
-  if (!result) {
+  if (!result || result.length < 0) {
     sendResponse(res, {
       statusCode: httpStatus.NOT_FOUND,
       success: false,
