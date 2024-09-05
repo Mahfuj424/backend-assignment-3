@@ -24,7 +24,8 @@ const logInUser = catchAsync(async (req, res, next) => {
     statusCode: httpStatus.OK,
     success: true,
     message: "User logged in successfully",
-    data: result,
+    token: result?.token,
+    data:result?.data
   });
 });
 

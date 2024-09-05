@@ -7,6 +7,7 @@ export type TUser = {
   phone: string;
   address: string;
   role: "user" | "admin";
+  image?: string;
 };
 
 export type TUserRole = keyof typeof USER_ROLE;

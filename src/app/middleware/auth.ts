@@ -16,9 +16,8 @@ const auth = (...requiredRole: TUserRole[]) => {
     }
 
     const token = authHeader.split(" ")[1];
-    console.log(token);
 
-    // Check if the token is valid
+    // Check if the token  is valid
     jwt.verify(token, config.jwt_access_screet as string, (err, decoded) => {
       if (err) {
         return res.status(401).json({
@@ -37,7 +36,6 @@ const auth = (...requiredRole: TUserRole[]) => {
         });
       }
       req.user = decoded as JwtPayload;
-      console.log('user console',req.user);
       next();
     });
   });

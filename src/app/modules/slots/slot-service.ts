@@ -3,12 +3,18 @@ import { TSlot } from "./slot-interface";
 import { Slot } from "./slot-model";
 
 const createSlotsIntoDB = async (payload: TSlot) => {
-  const { room, date, startTime, endTime } = payload
+  const { room, date, startTime, endTime } = payload;
 
-  const existingSlots = await Slot.find({ room, date });
+  const existingSlots = await Slot.find({
+    room,
+    date,
+    $or: [{ startTime: { $lt: endTime }, endTime: { $gt: startTime } }],
+  });
 
   if (existingSlots.length > 0) {
-    throw new Error(`Slots for room ${room} on date ${date} already exist.`);
+    throw new Error(
+      `Slots for room ${room} on date ${date} and time ${startTime} to ${endTime} already exist.`
+    );
   }
 
   const slots = [];
@@ -60,7 +66,25 @@ const getAvailableSlotsIntoDB = async (date: string, roomId: string) => {
   return slots;
 };
 
+const updateSlotFromDB = async (id: string, payload: Partial<TSlot>) => {
+  const result = await Slot.findByIdAndUpdate(
+    { _id: id },
+    { $set: payload },
+    { new: true, runValidators: true }
+  );
+  return result;
+};
+
+const deleteSlotFromDB = async (id: string) => {
+  const result = await Slot.findByIdAndDelete(
+    { _id: id },
+  );
+  return result;
+};
+
 export const SlotServices = {
   createSlotsIntoDB,
   getAvailableSlotsIntoDB,
+  updateSlotFromDB,
+  deleteSlotFromDB
 };

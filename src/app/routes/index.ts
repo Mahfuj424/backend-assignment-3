@@ -1,9 +1,9 @@
 import { Router } from 'express';
-import { UserRotues } from '../modules/user/user-route';
 import { RoomRoutes } from '../modules/room/room-route';
 import { AuthRotues } from '../modules/auth/auth-route';
 import { SlotRoutes } from '../modules/slots/slot-route';
 import { BookingRoutes } from '../modules/booking/booking-route';
+import { UserRotues } from '../modules/user/user-route';
 
 const router = Router();
 

@@ -17,6 +17,7 @@ const logInUserIntoDB = async (email: string, password: string) => {
     phone: user.phone,
     role: user.role,
     address: user.address,
+    image:user.image
   };
 
   // Create token and send to the user
@@ -25,9 +26,6 @@ const logInUserIntoDB = async (email: string, password: string) => {
   });
 
   return {
-    success: true,
-    statusCode: 200,
-    message: "User logged in successfully",
     token: accessToken,
     data: jwtPayload,
   };

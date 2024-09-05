@@ -10,7 +10,7 @@ const userSchema = new Schema<TUser>(
     email: {
       type: String,
       required: true,
-      unique:true
+      unique: true,
     },
     password: {
       type: String,
@@ -27,6 +27,11 @@ const userSchema = new Schema<TUser>(
     role: {
       type: String,
       enum: ["user", "admin"],
+      default: "user",
+    },
+    image: {
+      type: String,
+      trim: true,
     },
   },
   { timestamps: true }

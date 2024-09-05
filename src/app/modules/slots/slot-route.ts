@@ -7,8 +7,20 @@ import { USER_ROLE } from "../user/user-constant";
 
 const router = Router();
 
-router.post("/",auth(USER_ROLE.admin), validateRequest(slotValidaitons.createSlotSchema), SlotControllers.createSlots);
-router.get("/availability", SlotControllers.getAvailableSlots);
+router.post(
+  "/",
+  auth(USER_ROLE.admin),
+  validateRequest(slotValidaitons.createSlotSchema),
+  SlotControllers.createSlots
+);
+router.put(
+  "/:id",
+  auth(USER_ROLE.admin),
+  validateRequest(slotValidaitons.updateSlotSchema),
+  SlotControllers.updateSlot
+);
 
+router.delete("/:id", auth(USER_ROLE.admin), SlotControllers.deleteSlot);
+router.get("/availability", SlotControllers.getAvailableSlots);
 
 export const SlotRoutes = router;
