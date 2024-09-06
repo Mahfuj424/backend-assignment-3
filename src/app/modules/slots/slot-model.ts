@@ -23,6 +23,10 @@ const slotSchema = new Schema<TSlot>({
     type: Boolean,
     default: false,
   },
+  isDeleted: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 export const Slot = model<TSlot>("Slot", slotSchema);

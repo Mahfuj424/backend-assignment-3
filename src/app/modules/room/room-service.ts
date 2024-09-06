@@ -12,7 +12,7 @@ const getSingleRoomFromDB = async (id: string) => {
 };
 
 const getAllRoomFromDB = async () => {
-  const result = await Room.find();
+  const result = await Room.find({ isDeleted: false });
   return result;
 };
 
