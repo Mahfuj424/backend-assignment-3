@@ -20,6 +20,6 @@ router.put(
 );
 
 router.delete("/:id", auth(USER_ROLE.admin), SlotControllers.deleteSlot);
-router.get("/availability", SlotControllers.getAvailableSlots);
+router.get("/", SlotControllers.getAvailableSlots);
 
 export const SlotRoutes = router;

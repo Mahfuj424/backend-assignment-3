@@ -2,6 +2,10 @@ import { model, Schema } from "mongoose";
 import { TBooking } from "./booking-interface";
 
 const bookingSchema = new Schema<TBooking>({
+  transaction_id: {
+    type: String,
+    required: true,
+  },
   room: {
     type: Schema.Types.ObjectId,
     ref: "Room",

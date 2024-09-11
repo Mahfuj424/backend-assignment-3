@@ -5,12 +5,16 @@ import { Slot } from "./slot-model";
 const createSlotsIntoDB = async (payload: TSlot) => {
   const { room, date, startTime, endTime } = payload;
 
+  // Check if there are any existing slots with the same room, date, and overlapping time
   const existingSlots = await Slot.find({
-    room,
-    date,
-    $or: [{ startTime: { $lt: endTime }, endTime: { $gt: startTime } }],
+    room, // Only check slots in the same room
+    date, // Only check slots on the same date
+    $or: [
+      { startTime: { $lt: endTime }, endTime: { $gt: startTime } }, // Check for overlapping time slots
+    ],
   });
 
+  // If any matching slots are found, throw an error
   if (existingSlots.length > 0) {
     throw new Error(
       `Slots for room ${room} on date ${date} and time ${startTime} to ${endTime} already exist.`
