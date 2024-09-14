@@ -19,8 +19,6 @@ const getAllRoomFromDB = async (filterOptions: TFilterOptions) => {
     minPrice,
     maxPrice,
     sortby = "Default", // Set default value for sortBy
-    page = 1,
-    limit = 6,
   } = filterOptions;
 
   // Create the filter object
@@ -47,33 +45,21 @@ const getAllRoomFromDB = async (filterOptions: TFilterOptions) => {
   // Sorting options
   const sortOptions: any = {};
   if (sortby === "Price - High to Low") {
-    sortOptions.pricePerSlot = -1; // Sort by price in descending order
+    sortOptions.pricePerSlot = -1;
   } else if (sortby === "Price - Low to High") {
-    sortOptions.pricePerSlot = 1; // Sort by price in ascending order
+    sortOptions.pricePerSlot = 1;
   } else if (sortby === "new to old") {
-    sortOptions.createdAt = -1; // Sort by price in ascending order
+    sortOptions.createdAt = -1;
   } else if (sortby === "old to new") {
-    sortOptions.createdAt = 1; // Sort by price in ascending order
+    sortOptions.createdAt = 1;
   }
-  // For "Default", no sorting will be applied, meaning natural order will be used.
 
-  // Pagination logic
-  const skip = (page - 1) * limit;
-  const totalRooms = await Room.countDocuments(filters); // Total count for pagination
+  // Fetch rooms with filters and sorting
+  const rooms = await Room.find(filters).sort(sortOptions);
 
-  // Fetch rooms with filters, sorting, and pagination
-  const rooms = await Room.find(filters)
-    .sort(sortOptions) // This will apply sorting only if sortOptions is not empty
-    .skip(skip)
-    .limit(limit);
-
+  // Return the rooms directly without pagination
   return {
     data: rooms,
-    meta: {
-      totalRooms,
-      currentPage: page,
-      totalPages: Math.ceil(totalRooms / limit),
-    },
   };
 };
 

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { generateRandomId } from "../../utils/generateId";
 import { initiatePayment } from "../payment/payment_utils";
 import { Room } from "../room/room-model";
@@ -60,6 +61,7 @@ export const bookingRoomFromDB = async (payload: TBooking) => {
   // Initiate payment
 
   const paymentSession = await initiatePayment(paymentData);
+  console.log(paymentSession);
 
   // Populate and return booking data
   // const populatedBooking = await Booking.findById(booking._id)
@@ -72,7 +74,7 @@ export const bookingRoomFromDB = async (payload: TBooking) => {
 
 // get all booking
 const getAllBookingFromDB = async () => {
-  const result = await Booking.find({isDeleted:false})
+  const result = await Booking.find({ isDeleted: false })
     .populate("room")
     .populate("slots")
     .populate("user");
@@ -89,37 +91,81 @@ const getMyBookingFromDB = async (userId: string) => {
 };
 
 // update a booking
-const updateBookingRoomFromDB = async (
-  id: string,
-  payload: Partial<TBooking>
-) => {
+const updateBookingRoomFromDB = async (id: string, payload: any) => {
+  // Find the booking first without updating it
+  const booking = await Booking.findById(id);
+
+  if (!booking) {
+    throw new Error("Booking not found");
+  }
+
+  // Check if slots are available and valid
+  if (booking.slots && Array.isArray(booking.slots)) {
+    const currentTime = new Date().toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    const currentDate = new Date(); // Get the current date
+
+    let shouldDeleteBooking = false;
+
+    for (const slotId of booking.slots) {
+      const slot = await Slot.findById(slotId);
+
+      if (slot) {
+        // Extract the date and time from the slot
+        const slotDate = new Date(slot.date); // Assuming the date is in the 'date' field
+        const slotStartTime = new Date(
+          `1970-01-01T${slot.startTime}:00`
+        ).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+        // If currentDate is the same as the slotDate
+        if (
+          currentDate.toDateString() === slotDate.toDateString() &&
+          currentTime > slotStartTime
+        ) {
+          // If currentTime > slotStartTime, mark for deletion
+          shouldDeleteBooking = true;
+          await Slot.findByIdAndUpdate(slotId, { isBooked: false });
+        } else if (currentDate.toDateString() === slotDate.toDateString()) {
+          // Start countdown only when the current date matches the slot date
+          const slotStartTimeFull = new Date(
+            `${slotDate.toDateString()} ${slot.startTime}`
+          );
+          const timeDifference =
+            slotStartTimeFull.getTime() - currentDate.getTime();
+
+          if (timeDifference > 0) {
+            // Slot startTime hasn't passed, set a timer for 160 seconds
+            setTimeout(async () => {
+              await Slot.findByIdAndUpdate(slotId, { isBooked: false });
+              await Booking.findByIdAndUpdate(id, {
+                isConfirmed: "Time-Expired!",
+              });
+              console.log(
+                `Slot ${slotId} has been updated to isBooked: false after the start time passed.`
+              );
+            }, timeDifference + 160 * 1000); // Add 160 seconds or your desired time
+          }
+        }
+      }
+    }
+
+    if (shouldDeleteBooking) {
+      // Delete the booking if the slot's start time has passed
+      await Booking.findByIdAndDelete(id, { isDeleted: true });
+      console.log(`Slot startTime has passed, booking deleted.`);
+
+      // Return null to indicate the booking was deleted
+      return { message: "Slot start time expired. Booking deleted." };
+    }
+  }
+
+  // If the slot's start time has not passed, update the booking as usual
   const result = await Booking.findByIdAndUpdate(id, payload, {
     new: true,
     runValidators: true,
   });
-
-  // Check if isConfirmed is 'confirmed'
-  if (
-    result?.isConfirmed === "confirmed" &&
-    result.slots &&
-    Array.isArray(result.slots)
-  ) {
-    // For each slot ID in the bookingData.slots array
-    result.slots.forEach(async (slotId) => {
-      // Find the slot by its ID
-      const slot = await Slot.findById(slotId);
-
-      if (slot) {
-        // Set a timer to update isBooked to false after 1 hour
-        setTimeout(async () => {
-          await Slot.findByIdAndUpdate(slotId, { isBooked: false });
-          console.log(
-            `Slot ${slotId} has been updated to isBooked: false after 1 hour.`
-          );
-        }, 3600 * 1000); // 1 hour in milliseconds
-      }
-    });
-  }
 
   return result;
 };

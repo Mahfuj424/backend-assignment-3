@@ -49,44 +49,34 @@ const getSingleRoom = catchAsync(async (req, res, next) => {
   });
 });
 
-
 const getAllRoom = catchAsync(async (req, res, next) => {
   const filterOptions: TFilterOptions = {
     // Ensure that search is a string or default to an empty string
-    search: Array.isArray(req.query.search)
-      ? req.query.search[0]
-      : typeof req.query.search === "string"
-      ? req.query.search
-      : "",
+    search: typeof req.query.search === "string" ? req.query.search : "",
 
     // Convert capacity to number, or set it to undefined if not applicable
     capacity: req.query.capacity ? Number(req.query.capacity) : undefined,
 
     // Convert minPrice and maxPrice to number if they exist
     minPrice: req.query.minPrice
-      ? parseFloat(String(req.query.minPrice))
+      ? parseFloat(req.query.minPrice as string)
       : undefined,
     maxPrice: req.query.maxPrice
-      ? parseFloat(String(req.query.maxPrice))
+      ? parseFloat(req.query.maxPrice as string)
       : undefined,
 
     // Ensure that sortBy is a string, default to 'Default'
-    sortby: Array.isArray(req.query.sortBy)
-      ? req.query.sortBy[0]
-      : typeof req.query.sortBy === "string"
-      ? req.query.sortBy
-      : "Default", // Changed this to 'Default' to match the service logic
+    sortby: typeof req.query.sortBy === "string" ? req.query.sortBy : "Default",
 
     // Pagination: Ensure page and limit are numbers
-    page: req.query.page ? parseInt(String(req.query.page), 10) : 1,
-    limit: req.query.limit ? parseInt(String(req.query.limit), 10) : 8,
+    page: req.query.page ? parseInt(req.query.page as string, 10) : 1,
+    limit: req.query.limit ? parseInt(req.query.limit as string, 10) : 8,
   };
 
   const result = await RoomServices.getAllRoomFromDB(filterOptions);
 
-  if(!result){
-      throw new Error("data not found");
-    
+  if (!result) {
+    throw new Error("Data not found");
   }
 
   sendResponse(res, {
@@ -94,7 +84,6 @@ const getAllRoom = catchAsync(async (req, res, next) => {
     success: true,
     message: "Rooms retrieved successfully",
     data: result.data,
-    meta: result.meta,
   });
 });
 
