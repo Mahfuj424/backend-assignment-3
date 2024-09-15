@@ -15,7 +15,7 @@ app.use(express.json());
 
 app.use(
   cors({
-    origin: ["http://localhost:5173"],
+    origin: ["https://meeting-room-client-delta.vercel.app"],
     credentials: true,
   })
 );

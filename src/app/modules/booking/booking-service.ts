@@ -145,7 +145,7 @@ const updateBookingRoomFromDB = async (id: string, payload: any) => {
               console.log(
                 `Slot ${slotId} has been updated to isBooked: false after the start time passed.`
               );
-            }, timeDifference + 160 * 1000); // Add 160 seconds or your desired time
+            }, timeDifference + 3600 * 1000); // Add 160 seconds or your desired time
           }
         }
       }
